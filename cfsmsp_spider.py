@@ -1,3 +1,4 @@
+import re
 import argparse
 from urllib.parse import quote
 
@@ -67,7 +68,15 @@ class CfsmspSpider:
             last_key = key
 
 
-        return attr
+        return self.post_process(attr)
+
+    def post_process(self, record):
+        address = record['address']
+        record['country'] = 'France'
+        record['zipcode'] = next(iter(re.findall('\d{5}', address)), '')
+        record['city'] = next(iter(re.findall(f'{record["zipcode"]}\s(.*?)$', address)), '') if record['zipcode'] else ''
+
+        return record
 
     def get_key(self, raw_key):
         raw_key = self.clean(raw_key)
